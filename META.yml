@@ -12,5 +12,5 @@ conflicts: {}
 provides:
   Term::ProgressBar:
     file: lib/Term/ProgressBar.pm
-    version: 2.06
-generated_by: Module::Build version 0.19
+    version: 2.07
+generated_by: Module::Build version 0.21

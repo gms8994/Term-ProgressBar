@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.33.
+signed via the Module::Signature module, version 0.38.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -16,35 +16,35 @@ Hash: SHA1
 
 SHA1 308e635e1928d03e6c92ef224557847e18f492a6 BUGS
 SHA1 ab8e5a667507eabc4f4ee60306304394b16fce9c Build.PL
-SHA1 4ae8f1d1e87a88430f1cf36f92f4740649f477a5 Changes
+SHA1 43e35fdf6acf58b32dc4d2f9627d70afbb94c927 Changes
 SHA1 efa8cb615886410be8de15f5a6925697f624d278 INSTALL
 SHA1 d0e591b2e5eafcc9a8de8ff9eda691fad5f85ffc MANIFEST
 SHA1 5c69f53a9cb6f5f717dd1d02266fc7c9f675a902 MANIFEST.SKIP
-SHA1 48ef5fa2a2d9db2de1018d84c3b03775e4a2da7f META.yml
-SHA1 b0bc32bc6f76819b4df6e284f65168953b2caa21 Makefile.PL
-SHA1 6e0a218f27a5ce1cf26ca21d459cfc0b71171573 README
+SHA1 26ce28740cb7b96023d62e031c45de8da51d1c60 META.yml
+SHA1 de73a8867d8b34e104e11f7c534f6bbb41600a4d Makefile.PL
+SHA1 501a8ee44bdc9d430b6ad6ad44dbc8c60a939d2f README
 SHA1 51420517dc1a6b20d9402fa660ad64080a4a5304 configure
 SHA1 8a4e566bff0ad33481975d55bcef13a9244bde16 examples/powers
 SHA1 cb478a1724ae1816e12511be593fd33517702413 examples/powers2
 SHA1 077228b5ae0614385be67a4bf65169139463c651 examples/powers3
 SHA1 0fca941997cba7e66d39d4cec737ef09ee7df454 examples/powers4
 SHA1 37691f612074aa2fcea31c3b17c6ee46640f43db examples/powers5
-SHA1 de8701b78cd4c86204b68027a05b35efb017726a lib/Term/ProgressBar.pm
+SHA1 ab9ad5a899a6205d466833692699fc3adf706ead lib/Term/ProgressBar.pm
 SHA1 37ba03162a46931b496a18413401d8f25b303cf1 make-pm
 SHA1 e7569e5eeef2a8558e6d4828be087a6e1a841295 t/0-signature.t
 SHA1 433e3ecad2aa8a7b3bb2f3766b17c195b33cbcc5 t/compat.t
-SHA1 310fee4925e9db0cef9d717402f0402e7a2e7127 t/eta-linear.t
-SHA1 15e60428dc13e8894992ad30f591f8524a8121cd t/name.t
+SHA1 f02bc46da7e3c83478c244adfad443f9c1a2b4ca t/eta-linear.t
+SHA1 f3b178ae1e9f1f1789443522ac861c8421f93eee t/name.t
 SHA1 037b2bf330c9ce722c1d122e4e561c610f4fee83 t/test.pm
-SHA1 4aa25b9348948fefa8abef548ab20e26b6bb86ea t/v1-message.t
+SHA1 ab36b1695c7ca9281da620347487bf88d02e66da t/v1-message.t
 SHA1 91f9f8f0765d5d7924c4c130934facb91eca6833 t/v2-message.t
-SHA1 cd0fdf433775cf67d61a9634248b900b4c4083db t/v2-mobile.t
-SHA1 e475353fda6e7974722da33d06793c213100a8a0 t/v2-simple.t
-SHA1 b9ca4f362d75f38e25c2a1db34e2c15da60175ed t/zero.t
+SHA1 87ecb3158e5eb9fe020c819e2d2f80ff8be45d92 t/v2-mobile.t
+SHA1 119b353912834b0040150a7094bf14425be03936 t/v2-simple.t
+SHA1 9048c3d6b67959e3cd598ac0e151daff435f39fe t/zero.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.3 (GNU/Linux)
+Version: GnuPG v1.2.2 (Darwin)
 
-iD8DBQFAVDmGV6eZRcV4WK0RAmWeAJ9YlIRQtVLmg80M97s/D4etioQqKwCeN37+
-rqVFu9r43yayKix57/JU4Ro=
-=j7xQ
+iD8DBQFCK0d/V6eZRcV4WK0RAklkAJ9dOdo6nWcFUGfmFFzlo4RF22DBIgCgtl0Q
+yPa5X7coY7unjAluVnjYctA=
+=Moe1
 -----END PGP SIGNATURE-----

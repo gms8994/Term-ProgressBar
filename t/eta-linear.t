@@ -8,9 +8,9 @@ This package tests the basic functionality of Term::ProgressBar.
 
 =cut
 
-use Data::Dumper 2.101 qw( Dumper );
-use FindBin 1.42 qw( $Bin );
-use Test 1.122 qw( ok plan );
+use Data::Dumper  qw( Dumper );
+use FindBin       qw( $Bin );
+use Test          qw( ok plan );
 
 use lib $Bin;
 use test qw( DATA_DIR
@@ -79,7 +79,7 @@ Update it it from 1 to 10.
   ok grep $_ eq 'Hello Mum!', @lines;
   ok $lines[-1], qr/\[=+\]/,                                  'Count 1-10 (6)';
   ok $lines[-1], qr/^fred: \s*100%/,                          'Count 1-10 (7)';
-  ok $lines[-1], qr/-- DONE --$/,                             'Count 1-10 (8)';
+  ok $lines[-1], qr/D[ \d]\dh\d{2}m\d{2}s$/,                  'Count 1-10 (8)';
   ok $lines[-2], qr/ Left$/,                                  'Count 1-10 (9)';
 }
 

@@ -1,16 +1,23 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.07  Sun Mar  6  1:31 PM GMT 2005
+	- Correct handling of non-term mode to output stats but no PB
+	- Print time taken to complete in ETA mode when Done
+	- Add use of 'name' to example in 'new' doc
+	- Add doc of use of minor characters to description
+	- Add doc. for name value to new
+
 2.06  Sun Mar 14 10:46 AM GMT 2004
 	- Add patch to cope when terminal size cannot be detected or is
 	  too small.  
-	  Thanks to Ed Avis (<ed@embled.com>) for the patch.
+	  Thanks to Ed Avis (<ed at membled dot com>) for the patch.
 	- Add patch to test to avoid failure on windoze due to unlinking open 
 	  files
 	- Add patch to cope when Term::ReadKey fails to initialize for some 
 	  reason.
-	  Thanks to Scott Cain (<cain@cshl.org>) for the patch.
+	  Thanks to Scott Cain (<cain at cshl dot org>) for the patch.
 	- Add patch to suppress unnecessary terminal updates
-	  Thanks to Ed Avis (<ed@embled.com>) for the patch.
+	  Thanks to Ed Avis (<ed at membled dot com>) for the patch.
 
 2.05  Sat Aug 30  4:23 PM GMT 2003
 	- Fix test.pm to handle OS (e.g., Solaris) who refuse to delete the cwd
@@ -20,7 +27,8 @@ Revision history for Perl extension Term-ProgressBar.
 
 2.03  Sat Jan 11  3:47 PM GMT 2003
 	- Fix incorrect reset of progress bar in message method
-	  Thanks to Frank Maas (<frank.maas@cheiron-it.nl>) for the patch.
+	  Thanks to Frank Maas (<frank dot maas at cheiron-it dot nl>) for
+	  the patch.
 	- Improve documentation of ETA display formats.
 
 2.02  Tue Nov 19 10:08 PM GMT 2002
@@ -44,4 +52,4 @@ Revision history for Perl extension Term-ProgressBar.
 
 1.00  Mon Oct 30 2001
 	- original version
-	- by Edward Avis, <epa98@sync32>
+	- by Edward Avis, <epa98 at sync32>

@@ -42,6 +42,15 @@ call overhead is reduced.
 Remember to call the C<< $progress->update($max_value) >> when the job is done
 to get a nice 100% done bar.
 
+A progress bar by default is simple; it just goes from left-to-right, filling
+the bar with '=' characters.  These are called B<major> characters.  For
+long-running jobs, this may be too slow, so two additional features are
+available: a linear completion time estimator, and/or a B<minor> character:
+this is a character that I<moves> from left-to-right on the progress bar (it
+does not fill it as the major character does), traversing once for each
+major-character added.  This exponentially increases the granularity of the
+bar for the same width.
+
 =head1 EXAMPLES
 
 =head2 A really simple use
@@ -72,7 +81,7 @@ progress bar update will be very erratic.  See below for a smoother example.
 Note also that the progress bar will never complete; see below to solve this.
 
 The complete text of this example is in F<examples/powers> in the
-distribution set (it is not installed as part of the module.
+distribution set (it is not installed as part of the module).
 
 =head2 A smoother bar update
 
@@ -182,7 +191,7 @@ use vars '@EXPORT_OK';
 use Carp                    qw( croak );
 use Class::MethodMaker 1.02 qw( );
 use Fatal                   qw( open sysopen close seek );
-use POSIX                   qw( strftime );
+use POSIX                   qw( ceil strftime );
 
 # ----------------------------------------------------------------------
 
@@ -237,7 +246,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.06';
+$VERSION = '2.07';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -332,6 +341,10 @@ a number, being equivalent to the C<count> key.
 The item count.  The progress is marked at 100% when update I<count> is
 invoked, and proportionally until then.
 
+=item name
+
+A name to prefix the progress bar with.
+
 =item fh
 
 The filehandle to output to.  Defaults to stderr.  Do not try to use
@@ -388,9 +401,11 @@ and completion estimated linearly.
   my $progress = Term::ProgressBar->new(100); # count from 1 to 100
   my $progress = Term::ProgressBar->new({ count => 100 }); # same
 
-  # Count to 200 thingies, outputting to stdout instead of stderr
+  # Count to 200 thingies, outputting to stdout instead of stderr,
+  # prefix bar with 'thingy'
   my $progress = Term::ProgressBar->new({ count => 200,
-                                          fh    => \*STDOUT });
+                                          fh    => \*STDOUT,
+                                          name  => 'thingy' });
 
 =back
 
@@ -407,7 +422,7 @@ sub init {
                       term_width => 50,    bar_width => 50,
                       major_char => '#',   minor_char => '',
                       lbrack     => '',    rbrack     => '',
-                      term       => 0, })
+                      term       => '0 but true', })
     if @_ == 2;
 
   my $target;
@@ -421,7 +436,7 @@ sub init {
 
   if ( UNIVERSAL::isa ($_[0], 'HASH') ) {
     ($target) = @{$_[0]}{qw(count)};
-    %config = %{$_[0]}; # Copy in, so later playing does tinker externally
+    %config = %{$_[0]}; # Copy in, so later playing does not tinker externally
   } else {
     ($target) = @_;
   }
@@ -462,8 +477,13 @@ sub init {
         if defined $config{name};
       $config{bar_width} -= 10
         if defined $config{ETA};
-      die "terminal width $config{term_width} too small for bar"
-        if $config{bar_width} < 1;
+      if ( $config{bar_width} < 1 ) {
+        warn "terminal width $config{term_width} too small for bar; defaulting to 10\n";
+        $config{bar_width} = 10;
+      }
+#    } elsif ( ! $config{term} ) {
+#      $config{bar_width}  = 1;
+#      $config{term_width} = defined $config{ETA} ? 12 : 5;
     } else {
       $config{bar_width}  = $target;
       die "configured bar_width $config{bar_width} < 1"
@@ -476,6 +496,7 @@ sub init {
   select(((select $config{fh}), $| = 1)[0]);
 
   $self->ETA(delete $config{ETA});
+
   $self->hash_init (%config,
 
                     offset        => 0,
@@ -584,7 +605,9 @@ Class::MethodMaker->import
                          max_update_rate
                      /],
    counter       => [qw/ last_position last_update /],
-   boolean       => [qw/ minor term name_printed pb_ended /],
+   boolean       => [qw/ minor name_printed pb_ended /],
+   # let it be boolean to handle 0 but true
+   get_set       => [qw/ term /],
   );
 
 # We generate these by hand since we want to check the values.
@@ -599,7 +622,7 @@ sub term_width {
     my $self = shift;
     return $self->{term_width} if not @_;
     croak 'wrong number of arguments' if @_ != 1;
-    croak 'term_width must be at least 5' if $_[0] < 5;
+    croak 'term_width must be at least 5' if $self->term and $_[0] < 5;
     $self->{term_width} = $_[0];
 }
 
@@ -730,8 +753,7 @@ sub update {
 
   local $\ = undef;
 
-
-  if ( $self->term ) {
+  if ( $self->term > 0 ) {
     local $\ = undef;
     my $to_print = "\r";
     $to_print .= "$name: "
@@ -745,7 +767,16 @@ sub update {
     if ( defined $ETA and $ratio > 0 ) {
       if ( $ETA eq 'linear' ) {
         if ( $ratio == 1 ) {
-          $to_print .= '-- DONE --';
+#          $to_print .= '-- DONE --';
+          my $taken = time - $self->start;
+          my $ss    = $taken % 60;
+          my $mm    = ($taken - $ss) % 3600;
+          my $hh    = int($taken / 3600);
+          if ( $hh > 99 ) {
+            $to_print .= sprintf('D %2dh%02dm', $hh, $mm, $ss);
+          } else {
+            $to_print .= sprintf('D%2dh%02dm%02ds', $hh, $mm, $ss);
+          }
         } elsif ( $ratio < PREDICT_RATIO ) {
           # No safe prediction yet
           $to_print .= 'ETA ------';
@@ -783,44 +814,48 @@ sub update {
 	}
 	$_ = $to_print;
     }
+
+    $next -= $self->offset;
+    $next /= $self->scale
+      unless $self->scale == 1;
   } else {
     local $\ = undef;
-    if ( $so_far == 0 and defined $name and ! $self->name_printed ) {
-      print $fh "$name: ";
-      $self->set_name_printed;
+
+    if ( $self->term ) { # special case for backwards compat.
+     if ( $so_far == 0 and defined $name and ! $self->name_printed ) {
+       print $fh "$name: ";
+       $self->set_name_printed;
+     }
+
+      my $position = int($self->bar_width * ($input_so_far / $target));
+      my $add      = $position - $self->last_position;
+      $self->last_position_incr ($add)
+        if $add;
+
+     print $fh $self->major_char x $add;
+
+     $next -= $self->offset;
+     $next /= $self->scale
+       unless $self->scale == 1;
+    } else {
+      my $pc = int(100*$input_so_far/$target);
+      printf $fh "[%s] %s: %3d%%\n", scalar(localtime), $name, $pc;
+
+      $next = ceil($target * ($pc+1)/100);
     }
-
-    my $position = int($self->bar_width * ($input_so_far / $target));
-    my $add      = $position - $self->last_position;
-    $self->last_position_incr ($add)
-      if $add;
-
-    print join(' ', $self->bar_width,
-                    $input_so_far,
-                    $self->last_update,
-                    $target,
-                    ($self->bar_width *
-                     ($input_so_far - $self->last_update) /
-                     $target),
-                     $add,
-               ),
-      "\n"
-        if DEBUG;
-
-    print $fh $self->major_char x $add;
 
     if ( $input_so_far >= $target ) {
       if ( $self->pb_ended ) {
         croak ALREADY_FINISHED;
       } else {
-        print $fh "\n";
+        print $fh "\n"
+          if $self->term;
         $self->set_pb_ended;
       }
     }
   }
-  $next -= $self->offset;
-  $next /= $self->scale
-    unless $self->scale == 1;
+
+
   $next = $target if $next > $target;
 
   $self->last_update($input_so_far);
