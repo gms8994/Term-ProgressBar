@@ -1,0 +1,19 @@
+A really simple progress bar for things that take a while.
+
+Doing stuff: ###########
+
+The bar grows as more stuff is done.  Fifty hash marks are printed
+altogether.
+
+use Term::ProgressBar;
+my $num_items = 100;
+my $bar = new Term::Progressbar('working magic', $num_items);
+foreach (0 .. $num_items-1) {
+    # do work for item $_
+    update $bar;
+}
+
+This is free software and you may distribute it under the same terms
+as perl itself.  There is no warranty.
+
+-- Ed Avis, epa98@doc.ic.ac.uk, 2000-10-30

@@ -1,0 +1,5 @@
+2000-10-30  Edward Avis,  <epa98@sync32>
+
+	* README, test.pl, mkdist, ProgressBar.pm, Makefile.PL, MANIFEST:
+	New file.
+
