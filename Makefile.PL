@@ -1,13 +1,11 @@
-use 5.005_62;
+use 5.005;
 use strict;
 
-use File::Spec::Functions qw( catfile );
+use File::Spec qw( );
+sub catfile { File::Spec->catfile(@_) }
 
 use constant MOD_REQS =>
   [
-#   { name    => 'Pod::Usage',
-#     version => '1.12', },
-
    { name    => 'Class::MethodMaker',
      package => 'Class-MethodMaker',
      version => '1.02', },

@@ -1,8 +1,7 @@
 # (X)Emacs mode: -*- cperl -*-
 
-use 5.005_62;
+use 5.005;
 use strict;
-use warnings;
 
 =head1 NAME
 
@@ -166,13 +165,62 @@ normally the person primarily responsible for the upkeep of the module.
 A single (concise!) sentence describing the rough purpose of the module.  It
 is not expected to be mightily accurate, but is for quick browsing of modules.
 
+=item DEPENDS
+
+I<Optional>
+
+If defined, this must be an arrayref of additional targets to insert into
+F<Makefile>.  Each element must be a hashref, with the following keys:
+
+=over 4
+
+=item target
+
+Name of the rule target
+
+=item reqs
+
+Arrayref of rule requisites
+
+=item rules
+
+Arrayref of rule lines.  Do not precede these with a tab character; this will
+be inserted for you.  Likewise, do not break the lines up.
+
+=back
+
+E.g.,
+
+  use constant DEPENDS      => [
+                                { target => 'lib/Class/MethodMaker.pm',
+                                  reqs   => [qw/ cmmg.pl /],
+                                  rules  => [ '$(PERL) $< > $@' ],
+                                },
+                               ];
+
+=item DERIVED_PM
+
+I<Optional>.  If defined, this is expected to be an arrayref of file names
+(relative to the dist base), that are pm files to be installed.
+
+By default, F<make.pm> finds the pms to install by a conducting a C<find> over
+the F<lib> directory when C<perl Makefile.PL> is run.  However, for pm files
+that are created, that will be insufficient.  By specifying extras with this
+constant, such files may be named (and therefore made), and also cleaned when
+a C<make clean> is issued.  This might well be used in conjunction with the
+L<DEPENDS|"DEPENDS"> constant to auto-make pm files.
+
+E.g.,
+
+  use constant DERIVED_PM     => [qw( lib/Class/MethodMaker.pm )];
+
 =cut
 
 use Config                   qw( %Config );
-use Env                      qw( @PATH );
-use ExtUtils::MakeMaker 5.45 qw( WriteMakefile );
+use ExtUtils::MakeMaker      qw( WriteMakefile );
 use File::Find               qw( find );
-use File::Spec::Functions    qw( catfile );
+use File::Spec               qw( );
+sub catfile { File::Spec->catfile(@_) }
 
 
 # Constants ---------------------------
@@ -198,7 +246,7 @@ use constant CONFIG =>
                    my ($name) = @_;
                    my $exec;
                  PATH_COMPONENT:
-                   for my $path (@PATH) {
+                   for my $path (split /:/, $ENV{PATH}) {
                      my $try = catfile $path, $name;
                      if ( -x $try ) {
                        $exec = $try;
@@ -216,7 +264,7 @@ use constant CONFIG =>
                    my $rv = $? >> 8;
                    die sprintf "Command $cmd exited with value: $rv\n"
                      if $rv != $expect;
-                   if ( $vstr =~ /(?:^|\D)(\d+[\._]\d+)(?!\d)/ ) {
+                   if ( $vstr =~ /(?:^|\D)v?(\d+(?:[._]\d+)+)(?![\d_.])/ ) {
                      (my $version = $1) =~ tr/_/./;
                      return $version;
                    } else {
@@ -289,7 +337,8 @@ sub check {
 
       if ( defined $vers ) {
         my $vfound = CONFIG->{$type}->{vers}->($name, $vopt, $vexpect);
-
+        my $str_v_reqd  = join '_', map sprintf('%09d',$_), split /\./,$vers;
+        my $str_v_found = join '_', map sprintf('%09d',$_), split /\./,$vfound;
         push @missing, { type     => $type,
                          name     => $name,
                          package  => $pkg,
@@ -298,7 +347,7 @@ sub check {
                          optional => $item->{optional},
                          message  => $item->{message},
                        }
-          if $vers > $vfound;
+          if $str_v_reqd gt $str_v_found;
       }
     } else {
       print STDERR " failed\n"
@@ -320,39 +369,40 @@ sub check {
 
 # Self Test
 
-# Find Module (no version)
-check([{ name => 'integer' , type => TYPE_MOD, }])
-  and die "Internal Check (1) failed\n";
-# Fail module (no version)
-check([{ name => 'flubble' , type => TYPE_MOD, }])
-  or die "Internal Check (2) failed\n";
-# Find module, wrong version
-check([{ name => 'IO'      , type => TYPE_MOD, version => '100.0', }])
-  or die "Internal Check (3) failed\n";
-# Find module, right version
-check([{ name => 'IO'      , type => TYPE_MOD, version => '1.00',  }])
-  and die "Internal Check (4) failed\n";
+if ( $ENV{MAKE_SELF_TEST} ) {
+  # Find Module (no version)
+  check([{ name => 'integer' , type => TYPE_MOD, }])
+    and die "Internal Check (1) failed\n";
+  # Fail module (no version)
+  check([{ name => 'flubble' , type => TYPE_MOD, }])
+    or die "Internal Check (2) failed\n";
+  # Find module, wrong version
+  check([{ name => 'IO'      , type => TYPE_MOD, version => '100.0', }])
+    or die "Internal Check (3) failed\n";
+  # Find module, right version
+  check([{ name => 'IO'      , type => TYPE_MOD, version => '1.00',  }])
+    and die "Internal Check (4) failed\n";
 
-# Find exec (no version)
-  # Use more (common to dog/windoze too!) (mac?)
-check([{ name => 'more'    , type => TYPE_EXEC, }])
-  and die "Internal Check (5) failed\n";
-# Fail exec (no version)
-check([{ name => ' wibwib' , type => TYPE_EXEC, }])
-  or die "Internal Check (6) failed\n";
+  # Find exec (no version)
+    # Use more (common to dog/windoze too!) (mac?)
+  check([{ name => 'more'    , type => TYPE_EXEC, }])
+    and die "Internal Check (5) failed\n";
+  # Fail exec (no version)
+  check([{ name => ' wibwib' , type => TYPE_EXEC, }])
+    or die "Internal Check (6) failed\n";
 
-# Could do with one that works on dog/windoze/mac...
-if ( $Config{osname} eq 'linux' ) {
-  # Find exec, wrong version
-  check([{ name => 'cut'     , type => TYPE_EXEC,
-           version => '100.0', vopt => '--version', }])
-    or die "Internal Check (7) failed\n";
-  # Find exec, right version
-  check([{ name => 'cut'     , type => TYPE_EXEC,
-           version => '1.0', vopt => '--version', }])
-    and die "Internal Check (8) failed\n";
+  # Could do with one that works on dog/windoze/mac...
+  if ( $Config{osname} eq 'linux' ) {
+    # Find exec, wrong version
+    check([{ name => 'cut'     , type => TYPE_EXEC,
+             version => '100.0', vopt => '--version', }])
+      or die "Internal Check (7) failed\n";
+    # Find exec, right version
+    check([{ name => 'cut'     , type => TYPE_EXEC,
+             version => '1.0', vopt => '--version', }])
+      and die "Internal Check (8) failed\n";
+  }
 }
-
 # -------------------------------------
 
 my @missing;
@@ -382,6 +432,8 @@ exit 2
 
 my %pm;
 find (sub {
+        $File::Find::prune = 1, return
+          if -d $_ and $_ eq 'CVS';
         return unless /\.pm$/;
         (my $target = $File::Find::name) =~
           s/^$File::Find::topdir/\$(INST_LIBDIR)/;
@@ -395,7 +447,7 @@ check: test
 EOF
 }
 
-WriteMakefile
+my %Config =
   (NAME         => NAME,
    VERSION_FROM => VERSION_FROM,
    AUTHOR       => AUTHOR,
@@ -405,6 +457,35 @@ WriteMakefile
    PM           => \%pm,
    EXE_FILES    => [ grep !/(?:CVS|~)$/, glob catfile (qw( bin * )) ],
   );
+
+if ( defined *DEPENDS{CODE} ) {
+  my $depends = *DEPENDS{CODE}->();
+  my %depends;
+  for (@$depends) {
+    my ($target) = $_->{target};
+    my ($reqs)   = $_->{reqs};
+    my ($rules)  = $_->{rules};
+
+    $depends{$target} = join("\n\t", join(' ', @$reqs), @$rules) . "\n";
+  }
+  $Config{depend} = \%depends;
+}
+
+if ( defined *DERIVED_PM{CODE} ) {
+  my $extra = *DERIVED_PM{CODE}->();
+  die sprintf "Don't know how to handle type: %s\n", ref $extra
+    unless UNIVERSAL::isa($extra, 'ARRAY');
+
+  for (@$extra) {
+    $Config{PM}->{$_} = catfile '$(INST_LIBDIR)', $_;
+    push @{$Config{clean}->{FILES}}, $_;
+  }
+}
+
+$Config{clean}->{FILES} = join ' ', @{$Config{clean}->{FILES}}
+  if exists $Config{clean};
+
+WriteMakefile (%Config);
 
 # ----------------------------------------------------------------------------
 

@@ -8,9 +8,9 @@ This package tests the moving target functionality of Term::ProgressBar.
 
 =cut
 
-use Data::Dumper 2.102 qw( Dumper );
+use Data::Dumper 2.101 qw( Dumper );
 use FindBin 1.42 qw( $Bin );
-use Test 1.13 qw( ok plan );
+use Test 1.122 qw( ok plan );
 
 use lib $Bin;
 use test qw( DATA_DIR

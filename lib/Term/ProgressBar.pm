@@ -168,20 +168,19 @@ distribution set (it is not installed as part of the module.
 
 # Pragmas --------------------------
 
-require 5.005_62;
 use strict;
-use warnings;
 
 # Inheritance ----------------------
 
 use base qw( Exporter );
-our @EXPORT_OK = qw( $PACKAGE $VERSION );
+use vars '@EXPORT_OK';
+@EXPORT_OK = qw( $PACKAGE $VERSION );
 
 # Utility --------------------------
 
 use Carp                    qw( croak );
 use Class::MethodMaker 1.02 qw( );
-use Fatal                   qw( :void open sysopen close seek );
+use Fatal                   qw( open sysopen close seek );
 use POSIX                   qw( strftime );
 use Term::ReadKey      2.14 qw( );
 
@@ -236,8 +235,9 @@ use constant DEBUG => 0;
 
 # -------------------------------------
 
-our $PACKAGE = 'Term-ProgressBar';
-our $VERSION = '2.00';
+use vars qw($PACKAGE $VERSION);
+$PACKAGE = 'Term-ProgressBar';
+$VERSION = '2.01';
 
 # ----------------------------------
 # CLASS CONSTRUCTION

@@ -91,7 +91,7 @@ my $count = 100;
 # Test 2: create a bar
 my $test_str = 'test';
 
-our $b;
+use vars '$b';
 my $o = grab_output("\$b = new Term::ProgressBar '$test_str', $count");
 if (not $b or $o->[0] ne '' or $o->[1] ne "$test_str: ") {
     print Data::Dumper->Dump([$b, $o], [qw( b o )])
