@@ -1,4 +1,4 @@
-Module Term-ProgressBar (2.04):
+Module Term-ProgressBar (2.05):
 
 Description:
 
@@ -35,4 +35,4 @@ Copyright:
     Copyright (c) 2000 Ed Avis.  This program is free software; you can
     redistribute it and/or modify it under the same terms as Perl itself.
 
-16th August, 2003
+30th August, 2003

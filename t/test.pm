@@ -46,6 +46,8 @@ Setting up the environment includes:
 
 =over 4
 
+=item Prepending F<blib/script> onto the path
+
 =item Pushing the module F<lib/> dir onto the @PERL5LIB var
 
 For executed scripts.
@@ -93,6 +95,8 @@ The following symbols are exported upon request:
 
 =item LIB_DIR
 
+=item PERL
+
 =item check_req
 
 =item compare
@@ -117,7 +121,7 @@ The following symbols are exported upon request:
 
 =cut
 
-@EXPORT_OK = qw( BIN_DIR DATA_DIR REF_DIR LIB_DIR
+@EXPORT_OK = qw( BIN_DIR DATA_DIR REF_DIR LIB_DIR PERL
                  check_req compare evcheck find_exec only_files read_file
                  save_output restore_output tempdir tmpnam );
 
@@ -128,6 +132,7 @@ use Cwd                      2.01 qw( cwd );
 use Env                           qw( PATH PERL5LIB );
 use Fatal                    1.02 qw( close open seek sysopen unlink );
 use Fcntl                    1.03 qw( :DEFAULT );
+use File::Basename                qw( basename );
 use File::Compare          1.1002 qw( );
 use File::Path             1.0401 qw( mkpath rmtree );
 use File::Spec                0.6 qw( );
@@ -157,6 +162,30 @@ sub updir {
   File::Spec->updir(@_);
 }
 
+sub min {
+  croak "Can't min over 0 args!\n"
+    unless @_;
+  my $min = $_[0];
+  for (@_[1..$#_]) {
+    $min = $_
+      if $_ < $min;
+  }
+
+  return $min;
+}
+
+sub max {
+  croak "Can't max over 0 args!\n"
+    unless @_;
+  my $max = $_[0];
+  for (@_[1..$#_]) {
+    $max = $_
+      if $_ > $max;
+  }
+
+  return $max;
+}
+
 # -------------------------------------
 # PACKAGE CONSTANTS
 # -------------------------------------
@@ -166,6 +195,23 @@ use constant DATA_DIR => catdir $Bin, updir, 'data';
 use constant REF_DIR  => catdir $Bin, updir, 'testref';
 use constant LIB_DIR  => catdir $Bin, updir, 'lib';
 
+use constant BUILD_SCRIPT_DIR => => catdir $Bin, updir, qw( blib script );
+
+sub find_exec {
+  my ($exec) = @_;
+
+  for (split /:/, $PATH) {
+    my $try = catfile $_, $exec;
+    return rel2abs($try)
+      if -x $try;
+  }
+  return;
+}
+
+use constant PERL     => (basename($^X) eq $^X ? 
+                          find_exec($^X)       :
+                          rel2abs($^X));
+
 # -------------------------------------
 # PACKAGE ACTIONS
 # -------------------------------------
@@ -174,6 +220,8 @@ use constant LIB_DIR  => catdir $Bin, updir, 'lib';
 # unshift @PERL5LIB, LIB_DIR;
 $PERL5LIB = defined $PERL5LIB ? join(':', LIB_DIR, $PERL5LIB) : LIB_DIR;
 unshift @INC,      LIB_DIR;
+
+$PATH = join ':', BUILD_SCRIPT_DIR, split /:/, $PATH;
 
 $_ = rel2abs($_)
   for @INC;
@@ -404,6 +452,7 @@ sub restore_output {
     or die "cannot close $name opened to tempfile: $!";
   open  $origfh, '>&' . fileno $savefh
     or die "cannot dup $name back again: $!";
+  select((select($origfh), $| = 1)[0]);
 
   seek $tmpfh, 0, 0;
   local $/ = undef;
@@ -554,12 +603,16 @@ END {
       if ( defined $ENV{TEST_DEBUG} and $ENV{TEST_DEBUG} =~ /\bSAVE\b/ ) {
         printf "Used temp dir: %s (%s)\n", @$_;
       } else {
+        # Solaris gets narky about removing the pwd.
+        chdir File::Spec->rootdir;
         rmtree $_->[0];
       }
     } else {
       if ( defined $ENV{TEST_DEBUG} and $ENV{TEST_DEBUG} =~ /\bSAVE\b/ ) {
         print "Used temp dir: $_\n";
       } else {
+        # Solaris gets narky about removing the pwd.
+        chdir File::Spec->rootdir;
         rmtree $_;
       }
     }
@@ -570,7 +623,7 @@ END {
 
 =head2 compare
 
-  compare(+{ fn1 => $fn1, fn2 => $fn2, gzip => 1 }), 1, 'test name';
+  compare(+{ fn1 => $fn1, fn2 => $fn2, gzip => 1 });
 
 This performs one test.
 
@@ -857,8 +910,32 @@ BEGIN {
           print STDERR "$fn2 ended at line: $.\n";
           $found = 1;
         } elsif ( $line2 ne $line1 ) {
-          print STDERR
-            "Difference at line $.:\n-$name1->$line1<---\n-$name2->$line2<---\n-";
+          my $maxlength = max(map length($_), $line1, $line2);
+          my $minlength = min(map length($_), $line1, $line2);
+
+          my @diffchars = grep(substr($line1, $_, 1) ne substr($line2, $_, 1),
+                               0..$minlength-1);
+          my $diff = ' ' x $minlength;
+          substr($diff, $_, 1) = '|'
+            for @diffchars;
+
+          my @extrachars, map((length($line1) > length($line2) ? '^' : 'v'),
+                              $minlength..$maxlength-1);
+
+          $diff = join '', $diff, @extrachars;
+
+          my $diff_count  = @diffchars;
+          my $extra_count = @extrachars;
+
+          print STDERR <<"END";
+Difference at line $. ($diff_count characters differ) (top line is $extra_count chars longer):
+$name1:
+-->$line1<--
+   $diff
+-->$line2<--
+$name2:
+Differing characters at positions @{[join ',',@diffchars]} (zero-based)
+END
           $found = 1;
         }
       }
@@ -1027,16 +1104,7 @@ nothing, if no such file exists.
 
 =cut
 
-sub find_exec {
-  my ($exec) = @_;
-
-  for (split /:/, $PATH) {
-    my $try = catfile $_, $exec;
-    return $try
-      if -x $try;
-  }
-  return;
-}
+# defined further up to use in constants
 
 # -------------------------------------
 

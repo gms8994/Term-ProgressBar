@@ -1,5 +1,8 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.05  Sat Aug 30  4:23 PM GMT 2003
+	- Fix test.pm to handle OS (e.g., Solaris) who refuse to delete the cwd
+
 2.04  Sat Aug 14  4:38 PM GMT 2003
 	- Change build system to accomodate CPAN & automated tests
 
