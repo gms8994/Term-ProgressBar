@@ -19,7 +19,7 @@ use constant MOD_REQS =>
   [
     { name    => 'Class::MethodMaker',
       version => '1.02',
-      package => 'Class-MethodMaker',
+      
     },
   
     { name    => 'Term::ReadKey',

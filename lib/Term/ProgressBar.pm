@@ -250,7 +250,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.08';
+$VERSION = '2.09';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -775,10 +775,9 @@ sub update {
     if ( defined $ETA and $ratio > 0 ) {
       if ( $ETA eq 'linear' ) {
         if ( $ratio == 1 ) {
-#          $to_print .= '-- DONE --';
           my $taken = time - $self->start;
           my $ss    = $taken % 60;
-          my $mm    = ($taken - $ss) % 3600;
+          my $mm    = int(($taken % 3600) / 60);
           my $hh    = int($taken / 3600);
           if ( $hh > 99 ) {
             $to_print .= sprintf('D %2dh%02dm', $hh, $mm, $ss);
@@ -945,9 +944,9 @@ Significant contributions from Ed Avis, amongst others.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001, 2002, 2003,2004 Martyn J. Pearce.  This program is free
-software; you can redistribute it and/or modify it under the same terms as
-Perl itself.
+Copyright (c) 2001, 2002, 2003, 2004, 2005 Martyn J. Pearce.  This program is
+free software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
 
 =head1	SEE ALSO
 

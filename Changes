@@ -1,5 +1,8 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.09  Sun Mar 13  9:17 PM GMT 2005
+	- Fix for incorrect formatting of 'D...' time done at end
+
 2.08  Sat Mar 12 11:47 AM GMT 2005
 	- Add remove option
 	- Add patch to account for weird terminal sizing under Windoze
