@@ -237,7 +237,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -267,6 +267,25 @@ sub __force_term {
 # ----------------------------------
 # CLASS UTILITY FUNCTIONS
 # ----------------------------------
+
+sub term_size {
+  my ($fh) = @_;
+
+  my $result;
+  eval {
+    $result = (Term::ReadKey::GetTerminalSize($fh))[0];
+  }; if ( $@ ) {
+    warn "error from Term::ReadKey::GetTerminalSize(): $@";
+  }
+
+  if ( ! defined $result ) {
+    $result = 50;
+    warn "guessing terminal width $result\n";
+  }
+
+  return $result;
+}
+
 
 # INSTANCE METHODS -----------------------------------------------------
 
@@ -402,7 +421,7 @@ sub init {
     $config{term} = 1;
     $config{term_width} = $__FORCE_TERM;
   } elsif ( $config{term} and ! defined $config{term_width}) {
-    $config{term_width} = (Term::ReadKey::GetTerminalSize($config{fh}))[0];
+    $config{term_width} = term_size($config{fh});
   }
 
   unless ( defined $config{bar_width} ) {
