@@ -20,7 +20,7 @@ use constant MESSAGE1 => 'Walking on the Milky Way';
 
 BEGIN {
   # 1 for compilation test,
-  plan tests  => 8,
+  plan tests  => 11,
        todo   => [],
 }
 
@@ -39,17 +39,18 @@ Term::ProgressBar->__force_term (50);
 
 # -------------------------------------
 
-=head2 Tests 2--16: Count 1-10
+=head2 Tests 2--8: Count 1-10
 
 Create a progress bar with 10 things.
-Update it it from 1 to 10.
+Update it it from 1 to 10.  Output a message halfway through.
 
 (1) Check no exception thrown on creation
 (2) Check no exception thrown on update (1..5)
 (3) Check no exception thrown on message send
 (4) Check no exception thrown on update (6..10)
-(5) Check bar is complete
-(6) Check bar number is 100%
+(5) Check message was issued.
+(6) Check bar is complete
+(7) Check bar number is 100%
 
 =cut
 
@@ -76,3 +77,33 @@ Update it it from 1 to 10.
   ok $lines[-1], qr/\[=+\]/,            'Count 1-10 (5)';
   ok $lines[-1], qr/^\s*100%/,          'Count 1-10 (6)';
 }
+
+# -------------------------------------
+
+=head2 Tests 9--11: Message Check
+
+Run a progress bar from 0 to 100, each time calling a message after an update.
+This is to check that message preserves the progress bar value correctly.
+
+( 1) Check no exception thrown on creation
+( 2) Check no exception thrown on update, message (0..100).
+( 3) Check last progress is 100%
+
+=cut
+
+{
+  my $p;
+  save_output('stderr', *STDERR{IO});
+  ok (evcheck(sub { $p = Term::ProgressBar->new(100); }, 'Message Check ( 1)'),
+      1,                                                 'Message Check ( 1)');
+  ok (evcheck(sub { for (0..100) { $p->update($_); $p->message("Hello") } },
+              'Message Check ( 2)',), 
+      1,                                                 'Message Check ( 2)');
+  my $err = restore_output('stderr');
+
+  my @err_lines = split /\n/, $err;
+  (my $last_line = $err_lines[-1]) =~ tr/\r//d;
+  ok substr($last_line, 0, 4), '100%',               'Message Check ( 3)';
+}
+
+# ----------------------------------------------------------------------------

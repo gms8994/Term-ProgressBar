@@ -1,5 +1,10 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.03  Sat Jan 11  3:47 PM GMT 2003
+	- Fix incorrect reset of progress bar in message method
+	  Thanks to Frank Maas (<frank.maas@cheiron-it.nl>) for the patch.
+	- Improve documentation of ETA display formats.
+
 2.02  Tue Nov 19 10:08 PM GMT 2002
 	- Fix behaviour in terminals where GetTerminalSize fails (e.g.,
 	  resized Emacs term windows).  Thanks to Ed Avis for the patch.

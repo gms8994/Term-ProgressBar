@@ -154,7 +154,8 @@ distribution set (it is not installed as part of the module.
 
 This example uses the L<ETA|"ETA"> option to switch on completion estimation.
 Also, the update return is tuned to try to update the bar approximately once
-per second, with the L<max_update_rate|"max_update_rate"> call.
+per second, with the L<max_update_rate|"max_update_rate"> call.  See the
+documentation for the L<new|new> method for details of the format(s) used.
 
 This example also provides an example of the use of the L<message|"message">
 function to output messages to the same filehandle whilst keeping the progress bar intact
@@ -237,7 +238,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.02';
+$VERSION = '2.03';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -331,8 +332,20 @@ globref instead.
 A total time estimation to use.  If enabled, a time finished estimation is
 printed on the RHS (once sufficient updates have been performed to make such
 an estimation feasible).  Naturally, this is an I<estimate>; no guarantees are
-made.  The format of the estimate is intended to be as compact as possible
-while giving over some info.
+made.  The format of the estimate 
+
+Note that the format is intended to be as compact as possible while giving
+over the relevant information.  Depending upon the time remaining, the format
+is selected to provide some resolution whilst remaining compact.  Since the
+time remaining decreases, the format typically changes over time.
+
+As the ETA approaches, the format will state minutes & seconds left.  This is
+identifiable by the word C<'Left'> at the RHS of the line.  If the ETA is
+further away, then an estimate time of completion (rather than time left) is
+given, and is identifiable by C<'ETA'> at the LHS of the ETA box (on the right
+of the progress bar).  A time or date may be presented; these are of the form
+of a 24 hour clock, e.g. C<'13:33'>, a time plus days (e.g., C<' 7PM+3'> for
+around in over 3 days time) or a day/date, e.g. C<' 1Jan'> or C<'27Feb'>.
 
 If ETA is switched on, the return value of L<update|"update"> is also
 affected: the idea here is that if the progress bar seems to be moving quicker
@@ -812,7 +825,7 @@ sub message {
     print $fh "\n$string\n";
     print $fh $self->major_char x $self->last_position;
   }
-  $self->update($self->last_position);
+  $self->update($self->last_update);
 }
 
 
@@ -840,8 +853,9 @@ Martyn J. Pearce fluffy@engineer.com
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001, 2002 Martyn J. Pearce.  This program is free software; you
-can redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2001, 2002, 2003 Martyn J. Pearce.  This program is free
+software; you can redistribute it and/or modify it under the same terms as
+Perl itself.
 
 =head1	SEE ALSO
 
