@@ -1,6 +1,4 @@
-Perl Module Term-ProgressBar:
-
-    Progress bar for things that take a while.
+Module Term-ProgressBar (2.04):
 
 Description:
 
@@ -8,38 +6,33 @@ Description:
 
       50% [=====     ]
 
-    and is as long as the terminal.  Linear estimation of the time left
-    for the process to run is available.
+    and is as long as the terminal.  Linear estimation of the time left for
+    the process to run is available.
 
-Modules & Classes:
+Modules & Classes Provided:
 
     Term::ProgressBar - provide a progress meter on a standard terminal
 
-Executables:
+Required Packages:
 
-    *None*
+    Class::MethodMaker	1.02
+    Term::ReadKey	2.14
 
 Required Perl Version:
 
-    5_005.62
+    5.006
 
-Required Packages:
-
-    Class-MethodMaker 1.02
-    TermReadKey       2.14
-
-Required Executables:
-
-    *None*
-
-Package Maintainer: 
+Package Maintainer:
 
     Martyn J. Pearce fluffy@cpan.org
 
-Copyright: 
+Copyright:
 
-    Copyright (c) 2001, 2002, 2003 Martyn J. Pearce, (c) 2000 Ed Avis.  This
-    program is free software; you can redistribute it and/or modify it under
-    the same terms as Perl itself.
+    Copyright (c) 2003, 2002, 2001 Martyn J. Pearce.  This program is free
+    software; you can redistribute it and/or modify it under the same terms
+    as Perl itself.
 
-11th January, 2003
+    Copyright (c) 2000 Ed Avis.  This program is free software; you can
+    redistribute it and/or modify it under the same terms as Perl itself.
+
+16th August, 2003

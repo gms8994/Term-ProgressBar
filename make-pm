@@ -318,6 +318,7 @@ sub check {
   my ($items, $verbose) = @_;
 
   my ($type_max) = sort { $b <=> $a } map length, @{TYPES()};
+  my ($name_max) = sort { $b <=> $a } map length($_->{name}), @$items;
 
   my @missing;
 
@@ -329,7 +330,7 @@ sub check {
     my ($name, $pkg, $vers, $vopt, $vexpect) =
       @{$item}{qw( name package version vopt vexpect)};
 
-    printf STDERR "Checking for %${type_max}s %s...", $type, $name
+    printf STDERR "Checking for %-${type_max}s %-${name_max}s...", $type, $name
       if $verbose;
     if ( CONFIG->{$type}->{find}->($name) ) {
       print STDERR " found\n"
@@ -452,10 +453,20 @@ my %Config =
    VERSION_FROM => VERSION_FROM,
    AUTHOR       => AUTHOR,
    ABSTRACT     => ABSTRACT,
+   PREFIX       => PREFIX,
    PREREQ_PM    => { map (($_->{name} => $_->{version} || 0 ),
                           grep ! $_->{optional}, @{MOD_REQS()})},
    PM           => \%pm,
+   # Need this to stop Makefile treating Build.PL as a producer of Build as a
+   # target for 'all'.
+   PL_FILES     => +{},
    EXE_FILES    => [ grep !/(?:CVS|~)$/, glob catfile (qw( bin * )) ],
+   clean        => +{ FILES => [qw( Build _build )] },
+   realclean    => +{ FILES => [qw( Build.PL META.yml
+                                    Makefile.PL
+                                    README INSTALL
+                                    SIGNATURE
+                                    configure make-pm )] },
   );
 
 if ( defined *DEPENDS{CODE} ) {
@@ -482,8 +493,8 @@ if ( defined *DERIVED_PM{CODE} ) {
   }
 }
 
-$Config{clean}->{FILES} = join ' ', @{$Config{clean}->{FILES}}
-  if exists $Config{clean};
+$Config{clean}->{FILES}     = join ' ', @{$Config{clean}->{FILES}};
+$Config{realclean}->{FILES} = join ' ', @{$Config{realclean}->{FILES}};
 
 WriteMakefile (%Config);
 

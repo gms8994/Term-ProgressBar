@@ -1,0 +1,50 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.33.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It would check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 308e635e1928d03e6c92ef224557847e18f492a6 BUGS
+SHA1 6b4a4c71cf04436a793f27fc88ff3f3df8adc37f Build.PL
+SHA1 a4dfd95c57eacef1c4b11efa2e8d53735aa940be Changes
+SHA1 efa8cb615886410be8de15f5a6925697f624d278 INSTALL
+SHA1 d0e591b2e5eafcc9a8de8ff9eda691fad5f85ffc MANIFEST
+SHA1 2bd9e953ec897b405789b7fa7001f3f81bc43f3b MANIFEST.SKIP
+SHA1 6925b9145ccbd292a70b39244af882db68900737 META.yml
+SHA1 0f46512bd21185bb148d733f6580832fe452c91d Makefile.PL
+SHA1 ba2d9ea64c792c81dd6ccbf7caacb1aa78eced04 README
+SHA1 90df3ee7dc4117527e64c35c9e22ef8ca6b146ae configure
+SHA1 8a4e566bff0ad33481975d55bcef13a9244bde16 examples/powers
+SHA1 cb478a1724ae1816e12511be593fd33517702413 examples/powers2
+SHA1 077228b5ae0614385be67a4bf65169139463c651 examples/powers3
+SHA1 0fca941997cba7e66d39d4cec737ef09ee7df454 examples/powers4
+SHA1 37691f612074aa2fcea31c3b17c6ee46640f43db examples/powers5
+SHA1 6e8a8bcb3532700a04578a28c5e4515b6d169edb lib/Term/ProgressBar.pm
+SHA1 a7210a86661fcb548abefcf95cfb16ec3a2cedeb make-pm
+SHA1 e7569e5eeef2a8558e6d4828be087a6e1a841295 t/0-signature.t
+SHA1 433e3ecad2aa8a7b3bb2f3766b17c195b33cbcc5 t/compat.t
+SHA1 310fee4925e9db0cef9d717402f0402e7a2e7127 t/eta-linear.t
+SHA1 15e60428dc13e8894992ad30f591f8524a8121cd t/name.t
+SHA1 4db0ded4ecb7a0d49a0c1f84c0b6d24bef2451b8 t/test.pm
+SHA1 4aa25b9348948fefa8abef548ab20e26b6bb86ea t/v1-message.t
+SHA1 91f9f8f0765d5d7924c4c130934facb91eca6833 t/v2-message.t
+SHA1 cd0fdf433775cf67d61a9634248b900b4c4083db t/v2-mobile.t
+SHA1 03b9fb95b4ca10f5ede05a322b944d9ef57f3398 t/v2-simple.t
+SHA1 b9ca4f362d75f38e25c2a1db34e2c15da60175ed t/zero.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.2 (GNU/Linux)
+
+iD8DBQE/PmCsV6eZRcV4WK0RAjCWAKDEJd2+z5RdTAnqd8XS73OLlZyaUQCcC6eN
+f1gUpP048/0DOf+V1OeSWac=
+=Msfv
+-----END PGP SIGNATURE-----

@@ -238,7 +238,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.03';
+$VERSION = '2.04';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -849,7 +849,7 @@ filehandle is not treated as a terminal). This mode is deprecated.
 
 =head1	AUTHOR
 
-Martyn J. Pearce fluffy@engineer.com
+Martyn J. Pearce fluffy@cpan.org
 
 =head1 COPYRIGHT
 

@@ -1,5 +1,8 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.04  Sat Aug 14  4:38 PM GMT 2003
+	- Change build system to accomodate CPAN & automated tests
+
 2.03  Sat Jan 11  3:47 PM GMT 2003
 	- Fix incorrect reset of progress bar in message method
 	  Thanks to Frank Maas (<frank.maas@cheiron-it.nl>) for the patch.

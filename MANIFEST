@@ -6,7 +6,6 @@ lib/Term/ProgressBar.pm
 t/compat.t
 Makefile.PL
 BUGS
-make.pm
 t/test.pm
 t/v2-message.t
 t/v2-simple.t
@@ -20,3 +19,10 @@ examples/powers5
 t/eta-linear.t
 t/v1-message.t
 t/zero.t
+META.yml
+t/0-signature.t
+make-pm
+configure
+Build.PL
+SIGNATURE
+INSTALL
