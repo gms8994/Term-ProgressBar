@@ -4,6 +4,7 @@ use File::Spec;
 
 my $build = Module::Build->new
   (module_name   => 'Term::ProgressBar',
+   dist_version  => '2.06',
    license       => 'perl',
    requires      => {
                      Class::MethodMaker => '1.02',

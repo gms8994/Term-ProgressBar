@@ -18,7 +18,7 @@ use test qw( DATA_DIR
 
 BEGIN {
   # 1 for compilation test,
-  plan tests  => 30,
+  plan tests  => 31,
        todo   => [],
 }
 
@@ -100,3 +100,21 @@ Update it it from 1 to 9.
 }
 
 # -------------------------------------
+
+=head2 Test 31
+
+Make sure the same progress bar text is not printed twice to the
+terminal (in the case of an update that is too little to affect the
+percentage or displayed bar).
+
+=cut
+{
+  save_output('stderr', *STDERR{IO});
+  my $b = Term::ProgressBar->new(1000000);
+  $b->update($_) foreach (0, 1);
+  my $err = restore_output('stderr');
+  my @lines = grep $_ ne '', split /\r/, $err;
+  print Dumper \@lines
+    if $ENV{TEST_DEBUG};
+  ok scalar @lines, 1;
+}

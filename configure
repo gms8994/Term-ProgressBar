@@ -8,8 +8,9 @@ use Getopt::Long 2.19 qw( GetOptions );
 
 my $DEBUG;
 my $prefix;
-GetOptions ('debug'    => \$DEBUG,
-            'prefix=s' => \$prefix,)
+GetOptions ('debug'     => \$DEBUG,
+            'prefix=s'  => \$prefix,
+           )
   or die "Options parsing failed";
 
 warn "Building with perl: $^X\n";
@@ -29,6 +30,8 @@ use constant MOD_REQS =>
   ];
 
 use constant EXEC_REQS => [ ];
+
+
 
 use constant NAME         => 'Term-ProgressBar';
 use constant VERSION_FROM =>

@@ -40,7 +40,7 @@ make - tools for making makefiles with.
 
   use constant NAME         => 'Module-Name';
   use constant VERSION_FROM => catfile (qw( lib Module Name.pm ));
-  use constant AUTHOR       => 'Martyn J. Pearce fluffy@inpharmatica.co.uk';
+  use constant AUTHOR       => 'Martyn J. Pearce fluffy@cpan.org';
   use constant ABSTRACT     => 'This module makes chocolate biscuits';
 
   use make.pm
@@ -453,7 +453,6 @@ my %Config =
    VERSION_FROM => VERSION_FROM,
    AUTHOR       => AUTHOR,
    ABSTRACT     => ABSTRACT,
-   PREFIX       => PREFIX,
    PREREQ_PM    => { map (($_->{name} => $_->{version} || 0 ),
                           grep ! $_->{optional}, @{MOD_REQS()})},
    PM           => \%pm,
@@ -463,11 +462,17 @@ my %Config =
    EXE_FILES    => [ grep !/(?:CVS|~)$/, glob catfile (qw( bin * )) ],
    clean        => +{ FILES => [qw( Build _build )] },
    realclean    => +{ FILES => [qw( Build.PL META.yml
-                                    Makefile.PL
-                                    README INSTALL
+                                    INSTALL
                                     SIGNATURE
-                                    configure make-pm )] },
+                                    make-pm )] },
   );
+
+$Config{PREFIX} = *PREFIX{CODE}->()
+  if defined *PREFIX{CODE};
+push @{$Config{clean}->{FILES}}, @{*EXTRA_CLEAN{CODE}->()}
+  if defined *EXTRA_CLEAN{CODE};
+push @{$Config{realclean}->{FILES}}, qw( Makefile.PL configure README )
+  if -e 'INFO.yaml';
 
 if ( defined *DEPENDS{CODE} ) {
   my $depends = *DEPENDS{CODE}->();
@@ -488,7 +493,7 @@ if ( defined *DERIVED_PM{CODE} ) {
     unless UNIVERSAL::isa($extra, 'ARRAY');
 
   for (@$extra) {
-    $Config{PM}->{$_} = catfile '$(INST_LIBDIR)', $_;
+    $Config{PM}->{catfile('lib', $_)} = catfile '$(INST_LIBDIR)', $_;
     push @{$Config{clean}->{FILES}}, $_;
   }
 }
@@ -518,8 +523,9 @@ Martyn J. Pearce C<fluffy@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001, 2002 Martyn J. Pearce.  This program is free software; you
-can redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2001, 2002, 2003 Martyn J. Pearce.  This program is free
+software; you can redistribute it and/or modify it under the same terms as
+Perl itself.
 
 =head1 SEE ALSO
 

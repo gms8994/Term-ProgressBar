@@ -183,7 +183,6 @@ use Carp                    qw( croak );
 use Class::MethodMaker 1.02 qw( );
 use Fatal                   qw( open sysopen close seek );
 use POSIX                   qw( strftime );
-use Term::ReadKey      2.14 qw( );
 
 # ----------------------------------------------------------------------
 
@@ -238,7 +237,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.05';
+$VERSION = '2.06';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -272,6 +271,13 @@ sub __force_term {
 sub term_size {
   my ($fh) = @_;
 
+  eval {
+    require Term::ReadKey;
+  }; if ($@) {
+    warn "Guessing terminal width due to problem with Term::ReadKey\n";
+    return 50;
+  }
+
   my $result;
   eval {
     $result = (Term::ReadKey::GetTerminalSize($fh))[0];
@@ -279,7 +285,12 @@ sub term_size {
     warn "error from Term::ReadKey::GetTerminalSize(): $@";
   }
 
-  if ( ! defined $result ) {
+  # If GetTerminalSize() failed it should (according to its docs)
+  # return an empty list.  It doesn't - that's why we have the eval {}
+  # above - but also it may appear to succeed and return a width of
+  # zero.
+  #
+  if ( ! $result ) {
     $result = 50;
     warn "guessing terminal width $result\n";
   }
@@ -332,7 +343,7 @@ globref instead.
 A total time estimation to use.  If enabled, a time finished estimation is
 printed on the RHS (once sufficient updates have been performed to make such
 an estimation feasible).  Naturally, this is an I<estimate>; no guarantees are
-made.  The format of the estimate 
+made.  The format of the estimate
 
 Note that the format is intended to be as compact as possible while giving
 over the relevant information.  Depending upon the time remaining, the format
@@ -433,8 +444,11 @@ sub init {
   if ( $__FORCE_TERM ) {
     $config{term} = 1;
     $config{term_width} = $__FORCE_TERM;
+    die "term width $config{term_width} (from __force_term) too small"
+      if $config{term_width} < 5;
   } elsif ( $config{term} and ! defined $config{term_width}) {
     $config{term_width} = term_size($config{fh});
+    die if $config{term_width} < 5;
   }
 
   unless ( defined $config{bar_width} ) {
@@ -448,8 +462,12 @@ sub init {
         if defined $config{name};
       $config{bar_width} -= 10
         if defined $config{ETA};
+      die "terminal width $config{term_width} too small for bar"
+        if $config{bar_width} < 1;
     } else {
       $config{bar_width}  = $target;
+      die "configured bar_width $config{bar_width} < 1"
+ 	if $config{bar_width} < 1;
     }
   }
 
@@ -559,7 +577,6 @@ Class::MethodMaker->import
   (
    get_set       => [qw/ major_units major_char
                          minor_units minor_char
-                         term_width  bar_width
                          lbrack      rbrack
                          name
                          offset      scale
@@ -569,6 +586,22 @@ Class::MethodMaker->import
    counter       => [qw/ last_position last_update /],
    boolean       => [qw/ minor term name_printed pb_ended /],
   );
+
+# We generate these by hand since we want to check the values.
+sub bar_width {
+    my $self = shift;
+    return $self->{bar_width} if not @_;
+    croak 'wrong number of arguments' if @_ != 1;
+    croak 'bar_width < 1' if $_[0] < 1;
+    $self->{bar_width} = $_[0];
+}
+sub term_width {
+    my $self = shift;
+    return $self->{term_width} if not @_;
+    croak 'wrong number of arguments' if @_ != 1;
+    croak 'term_width must be at least 5' if $_[0] < 5;
+    $self->{term_width} = $_[0];
+}
 
 sub target {
   my $self = shift;
@@ -677,7 +710,7 @@ sub update {
     print $fh "\r";
     printf $fh "$name: "
       if defined $name;
-    print $fh '(nothing to do)';
+    print $fh "(nothing to do)\n";
     return 2**32-1;
   }
 
@@ -700,27 +733,27 @@ sub update {
 
   if ( $self->term ) {
     local $\ = undef;
-    print $fh "\r";
-    printf $fh "$name: "
+    my $to_print = "\r";
+    $to_print .= "$name: "
       if defined $name;
     my $ratio = $so_far / $target;
     # Rounds down %
-    print $fh (sprintf ("%3d%% %s%s%s",
+    $to_print .= (sprintf ("%3d%% %s%s%s",
                         $ratio * 100,
                         $self->lbrack, join ('', @chars), $self->rbrack));
     my $ETA = $self->ETA;
     if ( defined $ETA and $ratio > 0 ) {
       if ( $ETA eq 'linear' ) {
         if ( $ratio == 1 ) {
-          print $fh '-- DONE --';
+          $to_print .= '-- DONE --';
         } elsif ( $ratio < PREDICT_RATIO ) {
           # No safe prediction yet
-          print $fh 'ETA ------';
+          $to_print .= 'ETA ------';
         } else {
           my $time = time;
           my $left = (($time - $self->start) * ((1 - $ratio) / $ratio));
           if ( $left  < ETA_TIME_CUTOFF ) {
-            print $fh sprintf '%1dm%02ds Left', int($left / 60), $left % 60;
+            $to_print .= sprintf '%1dm%02ds Left', int($left / 60), $left % 60;
           } else {
             my $eta  = $time + $left;
             my $format;
@@ -731,7 +764,7 @@ sub update {
             } else {
               $format = 'ETA %e%b';
             }
-            printf $fh strftime($format, localtime $eta);
+            $to_print .= strftime($format, localtime $eta);
           }
           # Calculate next to be at least SEC_PER_UPDATE seconds away
           if ( $left > 0 ) {
@@ -743,6 +776,12 @@ sub update {
       } else {
         croak "Bad ETA type: $ETA\n";
       }
+    }
+    for ($self->{last_printed}) {
+	unless (defined and $_ eq $to_print) {
+	    print $fh $to_print;
+	}
+	$_ = $to_print;
     }
   } else {
     local $\ = undef;
@@ -825,6 +864,7 @@ sub message {
     print $fh "\n$string\n";
     print $fh $self->major_char x $self->last_position;
   }
+  undef $self->{last_printed};
   $self->update($self->last_update);
 }
 
@@ -851,9 +891,11 @@ filehandle is not treated as a terminal). This mode is deprecated.
 
 Martyn J. Pearce fluffy@cpan.org
 
+Significant contributions from Ed Avis, amongst others.
+
 =head1 COPYRIGHT
 
-Copyright (c) 2001, 2002, 2003 Martyn J. Pearce.  This program is free
+Copyright (c) 2001, 2002, 2003,2004 Martyn J. Pearce.  This program is free
 software; you can redistribute it and/or modify it under the same terms as
 Perl itself.
 
