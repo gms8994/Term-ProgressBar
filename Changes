@@ -1,5 +1,17 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.06  Sun Mar 14 10:46 AM GMT 2004
+	- Add patch to cope when terminal size cannot be detected or is
+	  too small.  
+	  Thanks to Ed Avis (<ed@embled.com>) for the patch.
+	- Add patch to test to avoid failure on windoze due to unlinking open 
+	  files
+	- Add patch to cope when Term::ReadKey fails to initialize for some 
+	  reason.
+	  Thanks to Scott Cain (<cain@cshl.org>) for the patch.
+	- Add patch to suppress unnecessary terminal updates
+	  Thanks to Ed Avis (<ed@embled.com>) for the patch.
+
 2.05  Sat Aug 30  4:23 PM GMT 2003
 	- Fix test.pm to handle OS (e.g., Solaris) who refuse to delete the cwd
 
