@@ -1,5 +1,10 @@
 Revision history for Perl extension Term-ProgressBar.
 
+2.08  Sat Mar 12 11:47 AM GMT 2005
+	- Add remove option
+	- Add patch to account for weird terminal sizing under Windoze
+	  (thanks to Andrew Peters for the patch).
+
 2.07  Sun Mar  6  1:31 PM GMT 2005
 	- Correct handling of non-term mode to output stats but no PB
 	- Print time taken to complete in ETA mode when Done

@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile (
   NAME         => 'Term-ProgressBar',
-  VERSION      => '2.07',
+  VERSION      => '2.08',
   AUTHOR       => 'Martyn J. Pearce ',
   ABSTRACT     => 'provide a progress meter on a standard terminal',
   PREREQ_PM    => +{ 

@@ -109,7 +109,7 @@ distribution set (it is not installed as part of the module.
 
 =head2 A (much) more efficient update
 
-  my $progress = Term::ProgressBar->new({name => 'Powers', count => $max});
+  my $progress = Term::ProgressBar->new({name => 'Powers', count => $max, remove => 1});
   $progress->minor(0);
   my $next_update = 0;
 
@@ -134,6 +134,9 @@ means that the call of C<< $progress->update($max); >> at the end is required
 to ensure that the bar ends on 100%, which gives the user a nice feeling.
 
 This example also sets the name of the progress bar.
+
+This example also demonstrates the use of the 'remove' flag, which removes the
+progress bar from the terminal when done.
 
 The complete text of this example is in F<examples/powers3> in the
 distribution set (it is not installed as part of the module.
@@ -234,6 +237,7 @@ use constant DEFAULTS => {
                           bar_width  => undef,
                           term_width => undef,
                           term       => undef,
+                          remove     => 0,
                          };
 
 use constant ETA_TYPES => { map { $_ => 1 } qw( linear ) };
@@ -246,7 +250,7 @@ use constant DEBUG => 0;
 
 use vars qw($PACKAGE $VERSION);
 $PACKAGE = 'Term-ProgressBar';
-$VERSION = '2.07';
+$VERSION = '2.08';
 
 # ----------------------------------
 # CLASS CONSTRUCTION
@@ -290,6 +294,7 @@ sub term_size {
   my $result;
   eval {
     $result = (Term::ReadKey::GetTerminalSize($fh))[0];
+    $result-- if ($^O eq "MSWin32");
   }; if ( $@ ) {
     warn "error from Term::ReadKey::GetTerminalSize(): $@";
   }
@@ -571,6 +576,9 @@ always guess right, so this method may be called to force it one way or the
 other.  Of course, the efficiency saving is minimal unless the client is
 utilizing the return value of L<update|"update">.
 
+See F<examples/powers4> and F<examples/powers3> to see minor characters in
+action, and not in action, respectively.
+
 =back
 
 =cut
@@ -605,7 +613,7 @@ Class::MethodMaker->import
                          max_update_rate
                      /],
    counter       => [qw/ last_position last_update /],
-   boolean       => [qw/ minor name_printed pb_ended /],
+   boolean       => [qw/ minor name_printed pb_ended remove /],
    # let it be boolean to handle 0 but true
    get_set       => [qw/ term /],
   );
@@ -818,6 +826,12 @@ sub update {
     $next -= $self->offset;
     $next /= $self->scale
       unless $self->scale == 1;
+
+    if ( $so_far >= $target and $self->remove and ! $self->pb_ended) {
+      print $fh "\r", ' ' x $self->term_width, "\r";
+      $self->pb_ended;
+    }
+
   } else {
     local $\ = undef;
 
@@ -848,8 +862,9 @@ sub update {
       if ( $self->pb_ended ) {
         croak ALREADY_FINISHED;
       } else {
-        print $fh "\n"
-          if $self->term;
+        if ( $self->term ) {
+          print $fh "\n"
+        }
         $self->set_pb_ended;
       }
     }
