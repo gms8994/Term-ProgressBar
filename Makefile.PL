@@ -1,7 +1,32 @@
-use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-WriteMakefile(
-    'NAME'	=> 'Term::ProgressBar',
-    'VERSION_FROM' => 'ProgressBar.pm', # finds $VERSION
-);
+use 5.005_62;
+use strict;
+
+use File::Spec::Functions qw( catfile );
+
+use constant MOD_REQS =>
+  [
+#   { name    => 'Pod::Usage',
+#     version => '1.12', },
+
+   { name    => 'Class::MethodMaker',
+     package => 'Class-MethodMaker',
+     version => '1.02', },
+
+   { name    => 'Term::ReadKey',
+     package => 'TermReadKey',
+     version => '2.14',
+   },
+  ];
+
+use constant EXEC_REQS =>
+  [
+  ];
+
+use constant NAME         => 'Term-ProgressBar';
+use constant VERSION_FROM => catfile (qw( lib Term ProgressBar.pm ));
+use constant AUTHOR       => 'Martyn J. Pearce fluffy@cpan.org';
+use constant ABSTRACT     => 'Progress bar for things that take a while';
+
+use FindBin 1.42 qw( $Bin );
+use lib $Bin;
+use make;

@@ -1,19 +1,45 @@
-A really simple progress bar for things that take a while.
+Perl Module Term-ProgressBar:
 
-Doing stuff: ###########
+    Progress bar for things that take a while.
 
-The bar grows as more stuff is done.  Fifty hash marks are printed
-altogether.
+Description:
 
-use Term::ProgressBar;
-my $num_items = 100;
-my $bar = new Term::Progressbar('working magic', $num_items);
-foreach (0 .. $num_items-1) {
-    # do work for item $_
-    update $bar;
-}
+    A progress bar for things that take a while.  It looks like
 
-This is free software and you may distribute it under the same terms
-as perl itself.  There is no warranty.
+      50% [=====     ]
 
--- Ed Avis, epa98@doc.ic.ac.uk, 2000-10-30
+    and is as long as the terminal.  Linear estimation of the time left
+    for the process to run is available.
+
+Modules & Classes:
+
+    Term::ProgressBar - provide a progress meter on a standard terminal
+
+Executables:
+
+    *None*
+
+Required Perl Version:
+
+    5_005.62
+
+Required Packages:
+
+    Class-MethodMaker 1.02
+    TermReadKey       2.14
+
+Required Executables:
+
+    *None*
+
+Package Maintainer: 
+
+    Martyn J. Pearce fluffy@cpan.org
+
+Copyright: 
+
+    Copyright (c) 2001, 2002 Martyn J. Pearce, (c) 2000 Ed Avis.  This program
+    is free software; you can redistribute it and/or modify it under the same
+    terms as Perl itself.
+
+20th June, 2002

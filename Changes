@@ -1,5 +1,17 @@
-2000-10-30  Edward Avis,  <epa98@sync32>
+Revision history for Perl extension Term-ProgressBar.
 
-	* README, test.pl, mkdist, ProgressBar.pm, Makefile.PL, MANIFEST:
-	New file.
+2.00  Sun Mar 10  5:26 GMT 2002
+	- New API added; now takes one hashref as argument (see docs)
+	- v1 API remains, but is deprecated
+	- Add message method to Term::ProgressBar
+	- Add v2 tests
 
+1.51  Sun Dec  2 12:22 GMT 2001
+	- Correct Bug #001
+
+1.50  Sat Dec  1 13:11 GMT 2001
+	- Merged with Utility::Progress by Martyn J. Pearce
+
+1.00  Mon Oct 30 2001
+	- original version
+	- by Edward Avis, <epa98@sync32>
