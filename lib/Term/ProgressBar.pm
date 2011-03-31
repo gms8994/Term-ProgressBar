@@ -238,6 +238,7 @@ use constant DEFAULTS => {
                           term_width => undef,
                           term       => undef,
                           remove     => 0,
+                          show_rate  => 0,
                          };
 
 use constant ETA_TYPES => { map { $_ => 1 } qw( linear ) };
@@ -482,6 +483,8 @@ sub init {
         if defined $config{name};
       $config{bar_width} -= 10
         if defined $config{ETA};
+      $config{bar_width} -= 10
+        if defined $config{show_rate};
       if ( $config{bar_width} < 1 ) {
         warn "terminal width $config{term_width} too small for bar; defaulting to 10\n";
         $config{bar_width} = 10;
@@ -501,6 +504,7 @@ sub init {
   select(((select $config{fh}), $| = 1)[0]);
 
   $self->ETA(delete $config{ETA});
+  $self->show_rate(delete $config{show_rate});
 
   $self->hash_init (%config,
 
@@ -664,6 +668,20 @@ sub ETA {
 
   return $self->{ETA};
 }
+sub show_rate {
+  my $self = shift;
+
+  if (@_) {
+    my ($type) = @_;
+    croak "Invalid value for show_rate; accepted values are 0 or 1\n"
+      if ($type !~ /^[01]$/);
+    $self->{show_rate} = $type;
+  }
+
+  return $self->{show_rate};
+}
+
+
 
 # ----------------------------------
 # INSTANCE HIGHER-LEVEL FUNCTIONS
@@ -767,6 +785,7 @@ sub update {
     $to_print .= "$name: "
       if defined $name;
     my $ratio = $so_far / $target;
+    my $taken = time - $self->start;
     # Rounds down %
     $to_print .= (sprintf ("%3d%% %s%s%s",
                         $ratio * 100,
@@ -775,7 +794,6 @@ sub update {
     if ( defined $ETA and $ratio > 0 ) {
       if ( $ETA eq 'linear' ) {
         if ( $ratio == 1 ) {
-          my $taken = time - $self->start;
           my $ss    = $taken % 60;
           my $mm    = int(($taken % 3600) / 60);
           my $hh    = int($taken / 3600);
@@ -814,6 +832,16 @@ sub update {
       } else {
         croak "Bad ETA type: $ETA\n";
       }
+    }
+    my $show_rate = $self->show_rate;
+    if ( defined $show_rate && $show_rate == 1) {
+      my $format = '';
+      if ($taken > $so_far) { ## more than 1 second per
+        $format = sprintf(" %ds per", $taken / ($so_far || 1));
+      } else { ## less than 1 second per
+        $format = sprintf(" %d/s", $so_far / ($taken || 1));
+      }
+      $to_print .= " "x(10 - length($format)) . $format;
     }
     for ($self->{last_printed}) {
 	unless (defined and $_ eq $to_print) {
